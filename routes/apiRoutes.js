@@ -86,7 +86,7 @@ router.get("/movies-shows-details/:id", jwtAuth, async (request, response) => {
       return response.send(404).json({ message: "Details Not Found" });
     }
 
-    if (movieShowObject.category === "movies") {
+    if (movieShowObject.category.toLocaleLowerCase() === "movies") {
       const movieDetailsObject = await cinemaPlayMovieDetails.findOne({
         _id: id,
       });
@@ -97,7 +97,9 @@ router.get("/movies-shows-details/:id", jwtAuth, async (request, response) => {
         _id: { $ne: id },
         category: { $regex: movieDetailsObject.category, $options: "i" },
         genre: {
-          $in: movieGenreList.map((eachGenre) => new RegExp(eachGenre, "i")),
+          $in: movieGenreList.map(
+            (eachGenre) => new RegExp(eachGenre.trim(), "i")
+          ),
         },
       });
       return response.status(200).json({
@@ -265,12 +267,10 @@ router.get("/sports-details/:id", jwtAuth, async (request, response) => {
       sportType: { $regex: sportDetailsResponse.sportType, $options: "i" },
     });
 
-    return response
-      .status(200)
-      .json({
-        matchDetails: sportDetailsResponse,
-        similarMatches: similarSports,
-      });
+    return response.status(200).json({
+      matchDetails: sportDetailsResponse,
+      similarMatches: similarSports,
+    });
   } catch (error) {
     console.log(error.message);
     return response.status(500).json({ message: error.message });
