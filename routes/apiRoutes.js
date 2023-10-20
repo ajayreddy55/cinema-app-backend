@@ -277,4 +277,40 @@ router.get("/sports-details/:id", jwtAuth, async (request, response) => {
   }
 });
 
+router.get("/search", jwtAuth, async (request, response) => {
+  try {
+    const { title } = request.query;
+
+    const moviesResults = await cinemaPlayMovieData.find({
+      title: { $regex: title, $options: "i" },
+      category: { $regex: "movies", $options: "i" },
+    });
+
+    const showsResults = await cinemaPlayMovieData.find({
+      title: { $regex: title, $options: "i" },
+      category: { $regex: "tv-shows", $options: "i" },
+    });
+
+    const sportsResults = await cinemaPlaySportsData.find({
+      title: { $regex: title, $options: "i" },
+    });
+
+    const newsResults = await cinemaPlayNewsData.find({
+      title: { $regex: title, $options: "i" },
+    });
+
+    return response
+      .status(200)
+      .json({
+        moviesResults: moviesResults,
+        showsResults: showsResults,
+        sportsResults: sportsResults,
+        newsResults: newsResults,
+      });
+  } catch (error) {
+    console.log(error.message);
+    return response.status(500).json({ message: error.message });
+  }
+});
+
 module.exports = router;
